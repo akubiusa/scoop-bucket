@@ -1,6 +1,6 @@
 # Scoop bucket
 
-Scoop bucket for myself
+Personal [Scoop](https://scoop.sh/) bucket.
 
 ## Add bucket
 

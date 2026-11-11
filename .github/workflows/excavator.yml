@@ -39,16 +39,16 @@ jobs:
           $sshDir = Join-Path $env:USERPROFILE '.ssh'
           New-Item -ItemType Directory -Force -Path $sshDir | Out-Null
 
-          # 秘密鍵を書き込む（CRLF を LF に変換し末尾改行を保証して OpenSSH が読める形式にする）
+          # Write the private key (convert CRLF to LF and ensure a trailing newline so OpenSSH can read it)
           $keyPath = Join-Path $sshDir 'excavator_ed25519'
           $keyContent = $env:EXCAVATOR_SSH_KEY -replace "`r`n", "`n" -replace "`r", "`n"
           if (-not $keyContent.EndsWith("`n")) { $keyContent += "`n" }
           [System.IO.File]::WriteAllBytes($keyPath, [System.Text.Encoding]::ASCII.GetBytes($keyContent))
 
-          # Windows OpenSSH は ACL が緩いと鍵を拒否するため権限を絞る
+          # Windows OpenSSH rejects keys with loose ACLs, so restrict the permissions
           icacls $keyPath /inheritance:r /grant:r "${env:USERNAME}:F" | Out-Null
 
-          # GitHub の公式 SSH ホスト鍵を固定値で書き込む（ssh-keyscan による MITM リスクを回避）
+          # Write GitHub's official SSH host keys as fixed values (avoids the MITM risk of ssh-keyscan)
           $knownHostsPath = Join-Path $sshDir 'known_hosts'
           $githubHostKeys = @(
             "github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl",
@@ -57,7 +57,7 @@ jobs:
           )
           [System.IO.File]::WriteAllBytes($knownHostsPath, [System.Text.Encoding]::ASCII.GetBytes(($githubHostKeys -join "`n") + "`n"))
 
-          # SSH config を設定（GitHub 接続時に excavator_ed25519 を使用、BatchMode で認証失敗時に即座エラー）
+          # Configure SSH to use excavator_ed25519 for GitHub; BatchMode fails immediately on authentication errors
           $sshConfigPath = Join-Path $sshDir 'config'
           $sshConfig = @(
             "Host github.com",
@@ -68,7 +68,7 @@ jobs:
           )
           [System.IO.File]::WriteAllBytes($sshConfigPath, [System.Text.Encoding]::ASCII.GetBytes(($sshConfig -join "`n") + "`n"))
 
-          # SSH 接続テストで Deploy Key 認証を事前確認（exit 1 は GitHub の正常動作）
+          # Check Deploy Key authentication up front (ssh -T exits with 1 on success; the output is checked instead)
           Write-Host 'Testing SSH connection to GitHub...'
           $sshOutput = ssh -T git@github.com 2>&1
           Write-Host $sshOutput
@@ -77,7 +77,7 @@ jobs:
             exit 1
           }
 
-          # Deploy Key で Ruleset をバイパスするため SSH URL に変更
+          # Switch to the SSH URL so that the Deploy Key bypasses the ruleset
           git remote set-url origin "git@github.com:$($env:GITHUB_REPOSITORY).git"
       - name: Excavate
         shell: pwsh
@@ -88,10 +88,10 @@ jobs:
           $scoopHome = scoop prefix scoop
           $bucketDir = Join-Path $env:GITHUB_WORKSPACE 'bucket'
 
-          # 全マニフェストのバージョンチェックと更新
+          # Check and update the versions of all manifests
           & (Join-Path $scoopHome 'bin\checkver.ps1') -Dir $bucketDir -Update -SkipUpdated
 
-          # 変更されたマニフェストを取得
+          # Collect the changed manifests
           $changedFiles = git diff --name-only | Where-Object { $_ -like 'bucket/*.json' }
 
           if (-not $changedFiles) {
@@ -109,7 +109,7 @@ jobs:
             git commit -m "${app}: Update to version ${version}"
           }
 
-          # README.md の Apps セクションを更新
+          # Update the Apps section of README.md
           & (Join-Path $env:GITHUB_WORKSPACE 'bin\update-readme.ps1')
           $readmeChanged = git diff --name-only README.md
           if ($readmeChanged) {

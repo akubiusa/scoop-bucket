@@ -1,20 +1,16 @@
 name: Keep Alive
 
-# GitHub Actions は 60 日間リポジトリへのアクティビティがないと
-# スケジュールワークフローを自動的に無効化する。
-# このワークフローは定期的に実行し、無効化されたワークフローを
-# GitHub API で再有効化する。
-# 参考: https://gooner.hateblo.jp/entry/2025/02/27/163322
+# GitHub Actions automatically disables scheduled workflows after 60 days without repository activity.
+# This workflow runs periodically and re-enables disabled workflows through the GitHub API.
+# Reference: https://gooner.hateblo.jp/entry/2025/02/27/163322
 #
-# 注意: ワークフローの実行自体はリポジトリアクティビティとしてカウントされない。
-# そのため、このワークフロー自身が 60 日以上実行されない場合は
-# 無効化され自己再開できなくなる（ブートストラップ問題）。
-# excavator.yml が定期的にコミットを生成するため、
-# 通常このリポジトリでは問題にならない。
+# Note: workflow runs themselves do not count as repository activity.
+# If this workflow itself is not run for 60 days, it is disabled and cannot restart itself (bootstrap problem).
+# excavator.yml commits regularly, so this is normally not a problem in this repository.
 
 on:
   schedule:
-    # 毎月 1 日 0:00 UTC に実行
+    # Run at 00:00 UTC on the 1st of every month
     - cron: "0 0 1 * *"
   workflow_dispatch:
 
@@ -26,11 +22,10 @@ jobs:
       actions: write
 
     steps:
-      - name: 非アクティブにより無効化されたワークフローを再有効化
+      - name: Re-enable workflows disabled due to inactivity
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # 非アクティブにより無効化されたワークフローを取得し再有効化
           gh api "repos/${{ github.repository }}/actions/workflows" \
             --paginate \
             --jq '.workflows[] | select(.state == "disabled_inactivity") | .id' \
