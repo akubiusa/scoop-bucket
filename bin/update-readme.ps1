@@ -32,7 +32,7 @@ for ($i = 0; $i -lt $lines.Count; $i++) {
 }
 
 if ($appsStart -lt 0) {
-    Write-Error "README.md に '## Apps' セクションが見つかりませんでした。"
+    Write-Error "The '## Apps' section was not found in README.md."
     exit 1
 }
 
@@ -53,4 +53,4 @@ if ($nextSectionStart -ge 0) {
 $content = ($newLines -join "`n") + "`n"
 [System.IO.File]::WriteAllText($readmePath, $content)
 
-Write-Host "README.md の Apps セクションを更新しました。"
+Write-Host 'Updated the Apps section of README.md.'
