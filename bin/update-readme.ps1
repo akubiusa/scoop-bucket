@@ -41,7 +41,7 @@ $newSection += $appLines
 if ($nextSectionStart -ge 0) {
     $newLines = $lines[0..($appsStart - 1)] + $newSection + @('') + $lines[$nextSectionStart..($lines.Count - 1)]
 } else {
-    # Everything after the app list is dropped
+    # No later section: any other lines in the Apps section are replaced
     $newLines = $lines[0..($appsStart - 1)] + $newSection
 }
 

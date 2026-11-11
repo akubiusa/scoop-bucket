@@ -6,7 +6,7 @@ Read `AGENTS.md` at the repository root first; it is the source of truth for str
 
 Write review comments, and expect all deliverables (code comments, docs, commit messages, PR text), in English.
 Runtime log and error messages are English too.
-Manifest `description` fields are upstream text and are kept as is.
+Manifest `description` fields are English by Scoop convention and are kept as is.
 
 ## Review checklist
 
