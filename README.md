@@ -1,8 +1,8 @@
 # Scoop bucket
 
-個人用の [Scoop](https://scoop.sh/) バケットです。
+Personal [Scoop](https://scoop.sh/) bucket.
 
-## バケットの追加
+## Add bucket
 
 ```shell
 scoop bucket add book000-bucket https://github.com/book000/scoop-bucket

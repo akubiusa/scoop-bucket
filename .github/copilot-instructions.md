@@ -4,9 +4,9 @@ Read `AGENTS.md` at the repository root first; it is the source of truth for str
 
 ## Language
 
-Write review comments, and expect all deliverables (code comments, docs, commit messages, PR text), in Japanese, with a half-width space between Japanese and alphanumeric characters.
-Runtime log and error messages are English.
-Manifest `description` fields are upstream English text and are kept as is.
+Write review comments, and expect all deliverables (code comments, docs, commit messages, PR text), in English.
+Runtime log and error messages are English too.
+Manifest `description` fields are upstream text and are kept as is.
 
 ## Review checklist
 
